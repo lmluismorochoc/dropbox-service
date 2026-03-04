@@ -7,6 +7,7 @@ import { FilesModule } from './presentation/modules/files.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
     }),
     FilesModule,
   ],
