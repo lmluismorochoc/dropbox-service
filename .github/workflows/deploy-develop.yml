@@ -55,9 +55,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            # Crear directorio de configuración y escribir el .env desde los secrets
+            # Asegurar que el directorio de configuración existe
             mkdir -p ~/config/dropbox-service
-            printf "DROPBOX_ACCESS_TOKEN=%s\nPORT=8080\n" "${{ secrets.DROPBOX_ACCESS_TOKEN }}" > ~/config/dropbox-service/.env
 
             # Login en GHCR desde el servidor
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
