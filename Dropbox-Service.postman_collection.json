@@ -1,0 +1,113 @@
+{
+  "info": {
+    "name": "Dropbox Service API",
+    "_postman_id": "dropbox-service-collection",
+    "description": "Colección para probar el microservicio NestJS de gestión de archivos en Dropbox",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "📁 Files",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/files/upload",
+              "host": ["{{base_url}}"],
+              "path": ["files", "upload"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"folder\": \"/test\",\n  \"fileName\": \"prueba.txt\",\n  \"base64Content\": \"SGVsbG8gV29ybGQhIEVzdGUgZXMgdW4gYXJjaGl2byBkZSBwcnVlYmE=\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Sube un archivo en base64 a la carpeta indicada en Dropbox.\n\nEl base64 de ejemplo decodifica a: 'Hello World! Este es un archivo de prueba'"
+          },
+          "response": []
+        },
+        {
+          "name": "List Files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/files/list?folder=/test",
+              "host": ["{{base_url}}"],
+              "path": ["files", "list"],
+              "query": [
+                {
+                  "key": "folder",
+                  "value": "/test",
+                  "description": "Ruta de la carpeta en Dropbox"
+                }
+              ]
+            },
+            "description": "Lista todos los archivos de una carpeta en Dropbox."
+          },
+          "response": []
+        },
+        {
+          "name": "Download File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/files/download?path=/test/prueba.txt",
+              "host": ["{{base_url}}"],
+              "path": ["files", "download"],
+              "query": [
+                {
+                  "key": "path",
+                  "value": "/test/prueba.txt",
+                  "description": "Ruta completa del archivo en Dropbox"
+                }
+              ]
+            },
+            "description": "Descarga un archivo de Dropbox y lo retorna en base64."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/files?path=/test/prueba.txt",
+              "host": ["{{base_url}}"],
+              "path": ["files"],
+              "query": [
+                {
+                  "key": "path",
+                  "value": "/test/prueba.txt",
+                  "description": "Ruta completa del archivo a eliminar en Dropbox"
+                }
+              ]
+            },
+            "description": "Elimina un archivo de Dropbox."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

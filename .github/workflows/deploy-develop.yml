@@ -1,0 +1,83 @@
+name: Build & Deploy to Server (Develop)
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=,suffix=,format=short
+            type=raw,value=develop
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy on server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            # Crear directorio de configuración y escribir el .env desde los secrets
+            mkdir -p ~/config/dropbox-service
+            cat > ~/config/dropbox-service/.env << 'EOF'
+            DROPBOX_ACCESS_TOKEN=${{ secrets.DROPBOX_ACCESS_TOKEN }}
+            PORT=8080
+            EOF
+
+            # Login en GHCR desde el servidor
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Descargar la nueva imagen (tag develop)
+            IMAGE_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+            docker pull ghcr.io/$IMAGE_LOWER:develop
+
+            # Detener y eliminar el contenedor anterior (si existe)
+            docker stop dropbox-service-dev || true
+            docker rm   dropbox-service-dev || true
+
+            # Arrancar el nuevo contenedor en el puerto 5002 usando el archivo .env
+            docker run -d \
+              --name dropbox-service-dev \
+              --restart unless-stopped \
+              --network microservices-net \
+              -p 5002:8080 \
+              --env-file ~/config/dropbox-service/.env \
+              ghcr.io/$IMAGE_LOWER:develop
