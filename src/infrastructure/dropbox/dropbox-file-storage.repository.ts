@@ -13,13 +13,22 @@ export class DropboxFileStorageRepository implements IFileStorageRepository {
 
     constructor(private readonly configService: ConfigService) {
         const accessToken = this.configService.get<string>('DROPBOX_ACCESS_TOKEN');
-        if (!accessToken) {
-            throw new Error('DROPBOX_ACCESS_TOKEN no está definido en las variables de entorno');
+        const refreshToken = this.configService.get<string>('DROPBOX_REFRESH_TOKEN');
+        const clientId = this.configService.get<string>('DROPBOX_CLIENT_ID');
+        const clientSecret = this.configService.get<string>('DROPBOX_CLIENT_SECRET');
+
+        if (!accessToken && !refreshToken) {
+            throw new Error(
+                'Debe definir DROPBOX_ACCESS_TOKEN o DROPBOX_REFRESH_TOKEN en las variables de entorno',
+            );
         }
-        // Se usa node-fetch v2 porque el SDK de Dropbox usa .buffer() internamente
-        // que solo existe en node-fetch, no en el fetch nativo de Node 20
+
+        // Si se proporciona refreshToken, el SDK renovará automáticamente el accessToken
         this.dbx = new Dropbox({
             accessToken,
+            refreshToken,
+            clientId,
+            clientSecret,
             fetch: nodeFetch,
         });
     }

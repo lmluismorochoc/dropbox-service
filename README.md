@@ -11,15 +11,39 @@ Microservicio REST para gestión de archivos en **Dropbox** usando NestJS con Cl
    - `files.content.read`
    - `files.metadata.read`
 
-## Instalación
+## Instalación y Configuración
 
 ```bash
 # Instalar dependencias
 npm install
 
-# Copiar y configurar variables de entorno
+# Copiar variables de entorno
 cp .env.example .env
-# Edita .env y coloca tu DROPBOX_ACCESS_TOKEN
+```
+
+### Configuración de Dropbox (Token Persistente)
+Los tokens de acceso estándar de Dropbox caducan cada pocas horas. Para que el servicio funcione sin interrupciones, debes configurar **Refresh Tokens**:
+
+1.  Ve a tu app en [Dropbox App Console](https://www.dropbox.com/developers/apps).
+2.  Copia tu **App Key** (Client ID) y **App Secret** (Client Secret) al archivo `.env`.
+3.  Genera un **Refresh Token** (paso único):
+    - Abre en tu navegador (reemplaza YOUR_APP_KEY):
+      `https://www.dropbox.com/oauth2/authorize?client_id=YOUR_APP_KEY&token_access_type=offline&response_type=code`
+    - Autoriza la app y copia el código obtenido.
+    - Ejecuta este comando en tu terminal (reemplaza valores):
+      ```bash
+      curl https://api.dropbox.com/oauth2/token \
+          -d code=CODIGO_OBTENIDO \
+          -d grant_type=authorization_code \
+          -u APP_KEY:APP_SECRET
+      ```
+    - En la respuesta JSON verás un campo `"refresh_token"`. Cópialo a tu `.env`.
+
+### Variables en `.env` requerido:
+```bash
+DROPBOX_CLIENT_ID=...
+DROPBOX_CLIENT_SECRET=...
+DROPBOX_REFRESH_TOKEN=...
 ```
 
 ## Ejecución
