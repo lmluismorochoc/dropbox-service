@@ -7,7 +7,7 @@ set -e
 # ============================================================
 
 IMAGE="dropbox-service"
-CONTAINER="dropbox-service-dev"
+CONTAINER="dropbox-service"
 PORT="5002:5002"
 NETWORK="microservices-net"
 ENV_FILE="/opt/coactivas/backend/.env"
