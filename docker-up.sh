@@ -8,7 +8,7 @@ set -e
 
 IMAGE="dropbox-service"
 CONTAINER="dropbox-service-dev"
-PORT="5002:8080"
+PORT="5002:5002"
 NETWORK="microservices-net"
 ENV_FILE="/opt/coactivas/backend/.env"
 
@@ -43,6 +43,7 @@ docker run -d \
   --network "$NETWORK" \
   -p "$PORT" \
   --env-file "$ENV_FILE" \
+  --env PORT=5002 \
   "$IMAGE"
 
 log "$CONTAINER corriendo → puerto externo 5002"
