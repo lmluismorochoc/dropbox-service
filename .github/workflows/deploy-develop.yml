@@ -55,9 +55,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            # Asegurar que el directorio de configuración existe
-            mkdir -p ~/config/dropbox-service
-
             # Login en GHCR desde el servidor
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
@@ -69,11 +66,11 @@ jobs:
             docker stop dropbox-service-dev || true
             docker rm   dropbox-service-dev || true
 
-            # Arrancar el nuevo contenedor en el puerto 5002 usando el archivo .env
+            # Arrancar el nuevo contenedor en el puerto 5002 usando el .env unificado
             docker run -d \
               --name dropbox-service-dev \
               --restart unless-stopped \
               --network microservices-net \
               -p 5002:8080 \
-              --env-file ~/config/dropbox-service/.env \
+              --env-file /opt/coactivas/backend/.env \
               ghcr.io/$IMAGE_LOWER:develop
